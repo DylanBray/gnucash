@@ -1138,7 +1138,17 @@ gnc_gen_trans_set_price_to_selection_cb (GtkMenuItem *menuitem,
         if (!gnc_xfer_dialog_run_until_done(xfer))
             break; /* If the user cancels, return to the payment dialog without changes */
 
-        gnc_import_TransInfo_set_price (row.get_trans_info (), exch);
+
+        /* Note the exchange rate we received is backwards from what we really need:
+         * it converts value to amount, but the remainder of the code expects
+         * an exchange rate that converts from amount to value. So let's invert
+         * the result (though only if that doesn't result in a division by 0). */
+        if (!gnc_numeric_zero_p(exch))
+        {
+            gnc_import_TransInfo_set_price (row.get_trans_info (),
+                                            gnc_numeric_invert(exch));
+            refresh_model_row (info, model, row.get_iter(), row.get_trans_info());
+        }
     }
     g_list_free_full (selected_rows, (GDestroyNotify)gtk_tree_path_free);
     LEAVE("");
@@ -1452,15 +1462,27 @@ gnc_gen_trans_onButtonPressed_cb (GtkTreeView *treeview,
         GdkEventButton *event_button = (GdkEventButton *) event;
         if (event_button->button == GDK_BUTTON_SECONDARY)
         {
-            DEBUG("Right mouseClick detected- popup the menu.");
-            // Only pop up the menu if there's more than 1 selected transaction,
-            // or the selected transaction is an ADD.
-            GtkTreeSelection *selection = gtk_tree_view_get_selection (treeview);
+            DEBUG("Right mouseClick detected - popup the menu.");
+
+            auto selection = gtk_tree_view_get_selection (treeview);
+            auto selected_rows = gtk_tree_selection_count_selected_rows (selection);
+            /* If no rows are selected yet, select the row that was clicked on
+             * before proceeding */
+            if (!selected_rows)
+            {
+                GtkTreePath* path = nullptr;
+                if (gtk_tree_view_get_path_at_pos (treeview, event_button->x,
+                    event_button->y, &path, nullptr, nullptr, nullptr))
+                {
+                    gtk_tree_selection_select_path (selection, path);
+                    selected_rows++;
+                    gtk_tree_path_free (path);
+                }
+            }
             if (gtk_tree_selection_count_selected_rows (selection) > 0)
             {
-                GList* selected;
                 GtkTreeModel *model;
-                selected = gtk_tree_selection_get_selected_rows (selection, &model);
+                auto selected = gtk_tree_selection_get_selected_rows (selection, &model);
                 if (get_action_for_path (static_cast<GtkTreePath*>(selected->data), model) == GNCImport_ADD)
                     gnc_gen_trans_view_popup_menu (treeview, event, info);
                 g_list_free_full (selected, (GDestroyNotify)gtk_tree_path_free);

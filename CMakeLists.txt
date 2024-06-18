@@ -134,7 +134,7 @@ else()
   if (BASH)
     set(SHELL ${BASH})
   else()
-    message(SEND_ERROR "Can't find a suitable bash executable. Please set GNC_SHELL.")
+    message(SEND_ERROR "Can't find a suitable bash executable. Please install bash or set GNC_SHELL.")
   endif()
 endif()
 
@@ -152,16 +152,25 @@ if (GNC_VCS_INFO_RESULT EQUAL 0)
   # if building from VCS, we need git
   find_package(Git)
   if (NOT GIT_FOUND)
-    message(SEND_ERROR "Looks like we're building from version control, but can't find git executable. Please set GIT_EXECUTABLE.")
+    message(SEND_ERROR "Looks like we're building from version control, but can't find git executable. Please install git or set GIT_EXECUTABLE.")
   endif()
+endif()
+
+# Determine whether or not we have to generate a gnc-vcs-info.h file
+# Distribution tarballs have this file in the source tree
+# Git checkouts or zipfiles downloaded straight from github won't have it
+# and require us to build it.
+if (BUILDING_FROM_VCS OR NOT EXISTS "${CMAKE_SOURCE_DIR}/libgnucash/core-utilsgnc-vcs-info.h")
   set(VCS_INFO_BASE_DIR ${CMAKE_BINARY_DIR})
+  set(GENERATE_VCS_INFO "Yes")
 else()
   set(VCS_INFO_BASE_DIR ${CMAKE_SOURCE_DIR})
+  set(GENERATE_VCS_INFO "No")
 endif()
-# The location of gnc-vcs-info.h depends on whether we build from VCS or not
-# And this file is needed in several other build rules, so we define its
-# location once here.
-set(VCS_INFO_FILE ${VCS_INFO_BASE_DIR}/libgnucash/core-utils/gnc-vcs-info.h)
+# As the file's path is needed by several other build rules, we already define
+# that here. The actual build rules (if needed) are in libgnucash/core-utils.
+set(VCS_INFO_FILE ${VCS_INFO_BASE_DIR}/libgnucash/core-utils/gnc-vcs-info.h CACHE STRING "path to gnc-vcs-info.h file")
+
 
 if (WIN32)
   # Help Windows find the various dependencies. We assume here that the standard advice for building
@@ -843,6 +852,13 @@ add_definitions (-DHAVE_CONFIG_H)
 set (CONFIG_H ${CMAKE_CURRENT_BINARY_DIR}/common/config.h)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/common/config.h.cmake.in ${CONFIG_H})
 
+# The doxygen developer documentation
+find_program(DOXYGEN doxygen)
+if (NOT ${DOXYGEN} STREQUAL "DOXYGEN-NOTFOUND")
+  configure_file(doxygen.cfg.in doxygen.cfg)
+  add_custom_target(doc ${DOXYGEN} doxygen.cfg)
+endif()
+
 # The subdirectories
 add_subdirectory (borrowed)
 add_subdirectory (data)
@@ -884,7 +900,10 @@ endif()
 set(DIST_FILE "${PACKAGE_PREFIX}.tar")
 
 set(toplvl_DIST_local ${gnucash_DOCS}
-  CMakeLists.txt README)
+    doxygen.cfg.in
+    doxygen_main_page.c
+    CMakeLists.txt
+    README)
 
 
 set_local_dist(toplvl_DIST ${toplvl_DIST_local})

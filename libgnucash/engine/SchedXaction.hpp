@@ -1,9 +1,4 @@
-/********************************************************************
- * dialog-sx-from-trans.h -- a simple dialog for creating a         *
- *                           scheduled transaction from a real one  *
- *                       (GnuCash)                                  *
- * Copyright (C) 2000 Robert Merkel <rgmerk@mira.net>               *
- *                                                                  *
+/********************************************************************\
  * This program is free software; you can redistribute it and/or    *
  * modify it under the terms of the GNU General Public License as   *
  * published by the Free Software Foundation; either version 2 of   *
@@ -20,21 +15,28 @@
  * Free Software Foundation           Voice:  +1-617-542-5942       *
  * 51 Franklin Street, Fifth Floor    Fax:    +1-617-542-2652       *
  * Boston, MA  02110-1301,  USA       gnu@gnu.org                   *
- ********************************************************************/
+ *                                                                  *
+\********************************************************************/
 
-#ifndef GNC_DIALOG_SX_FROM_TRANS_H
-#define GNC_DIALOG_SX_FROM_TRANS_H
+#ifndef XACC_SCHEDXACTION_HPP
+#define XACC_SCHEDXACTION_HPP
 
-#include "Transaction.h"
+#include "qof.h"
+#include "gnc-engine.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <vector>
+#include "SX-ttinfo.hpp"
 
-void gnc_sx_create_from_trans(GtkWindow *parent, Transaction *trans);
+/** \brief Set the schedxaction's template transaction.  tt_vec is a
+vector of TTInfo's as defined in SX-ttinfo.hpp The edit dialog doesn't
+use this mechanism; maybe it should.
 
-#ifdef __cplusplus
-}
-#endif
+@param sx SchedXaction* the SchedXaction to modify
 
-#endif
+@param tt_vec TTInfoVec vector of transaction templates to assign to the SX
+
+@param book QofBook* the book that the SX belongs to
+*/
+void xaccSchedXactionSetTemplateTrans (SchedXaction*, const TTInfoVec&, QofBook*);
+
+#endif /* XACC_SCHEDXACTION_HPP */

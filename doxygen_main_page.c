@@ -2,77 +2,39 @@
 
 This is the new developer and design manual for GnuCash.
 
-\section maindocs Documentation Sections.
+\section maindocs Documentation Sections
 
 The documentation is organised in a rough sequence:
 
 -# \ref manualguide Start with the main GnuCash manual.
--# \ref texihtml Design overview.
--# \ref doxylist Individual topic overviews, linked into the
-	full API reference for each topic, generated from source code.
+-# \ref highlevel Pages that cover topics at a higher level. Most also have
+	links to the full API reference they relate to.
 -# \ref maingeneral How to work with Doxygen in your own code.
 
-\subsection manualguide External documentation.
+\section manualguide External documentation
 
 Please refer to the main
 <a href="https://www.gnucash.org/docs.phtml">documentation
 page</a> on the gnucash website which includes links to the
 GnuCash Manual and the Concepts Guide in various formats.
 
-\subsection texihtml Documentation elsewhere in the source tree.
+\section highlevel Highlevel overviews
 
-There is also the "GnuCash Design Overview" which can be generated
-from the source using texi2html from the texinfo files in
-src/doc/design, but this is even more outdated.
+Pages that cover topics at a higher level. Most also have
+links to the full API reference they relate to.
 
-\section doxylist Doxygen overviews.
-
-Where possible, each overview is dated - take care to review older texts
-in relation to existing code.
-
-- \ref backuppolicy
-- \ref bookperiods
-- \ref business1
-- \ref currencies
 - \ref deprecated
-- \ref engine
-- \ref backendold
-- \ref financeconstraints
-- \ref druidframework
-- \ref guid
-- \ref gnome2
 - \ref loanhandling
 - \ref kvpvalues
 - \ref lotsoverview
-- \ref multicurrency
-- \ref pricedocs
-- \ref gnucashextension
 - \ref python_bindings_page
-- \ref qif
-- \ref budgetplan
-- \ref taxnotes
 - \ref todo
-- \ref userprefs
 
-Each overview in this section is generated directly from the
-source files using Doxygen but some topics need updating.
-
-\section maingeneral General Doxygen help.
+\section maingeneral General Doxygen help
 
 - \ref tipshints
 - \ref reference
-- \ref stylediscussion
 
-*/
-/* The following section links were removed from the overview section
- * because there are no corresponding sections anywhere in
- * source. Aside from networkoverview, whose intent is obscure, it
- * would be good to have them at some point.
-
-- networkoverview
-- backenderrors
-- plugindesign
-- backendapi
 */
 
 /********************************************************************\
@@ -115,22 +77,15 @@ page title itself.
 /** \section hacking Hacking on this documentation
 
 There is the beginning of a style guide for documenting under
-\ref tipshints.
+\ref tipshints
 
-The Book Merge files are an attempt to document "by the book".
-\ref BookMerge\n
 Feel free to start documenting or playing with doxygen configuration.
 This main page can be found in src/doc/doxygen_main_page.c .
-
-Each doxygen section must be within a single comment block although
-large comment blocks can be split into separate pages:
-\ref stylediscussion.
 
 This main page is just an introduction to doxygen markup, see the
 Doxygen manual for the full command set.
 
 - \ref tipshints Tips and hints for using doxygen
-- \ref stylediscussion Long comments, pages, editors
 - \ref reference Links to the Doxygen manual
 
 Code snippets need special handling in the text overviews. Change all
@@ -146,7 +101,6 @@ of normal C files.
 \page tipshints Useful tips for doxygen in C files
 
  - \ref index Introduction
- - \ref stylediscussion Long comments, pages, editors
  - \ref reference The Doxygen manual
 
 \section tips An introduction to doxygen markup
@@ -214,40 +168,11 @@ doxywizard doxygen.cfg &
 
 */
 
-/** \page stylediscussion Style discussion
-
-- \ref index Introduction
-- \ref tipshints Tips and hints for using doxygen
-- \ref reference Links to the Doxygen manual
-
-[codehelpgpg 2004-07-25] Doxygen now copes with addgroup and this page
-can be handled more easily by splitting the old single comment into repeated
-comments, split into pages. I've worked on doxygen files in Kate, KWrite and XCode (MacOSX) and
-the comment highlighting works fine. If you do have problems, particularly when
-you start a new line within an existing comment, enter a character at the end of
-the last highlighted line to refresh the highlighting. Some editors have a specific
-refresh option.
-
-[cstim 2003-03-25] The "Data Structures" page of doxygen doesn't show
-anything useful for GnuCash. Obviously doxygen only accepts "real" C
-struct definitions for inclusion on that page. However, all GnuCash
-data structures are defined somewhere in private headers, and only the
-typedefs are publicly visible. Isn't there a way to have doxygen
-show the documentation for the <i>typedefs</i> on the "Data
-Structures" page? Unfortunately I don't know how.
-
-[codehelpgpg 2004-07-25] Yes, there is a way of linking to these data structures.
-Make sure that the private header is included in the documentation by including a
-\\file command in the private header file. Then include a short doxygen comment above
-the declaration. Doxygen will accept both valid C struct definition formats.
-
-*/
-
 /** \page reference Doxygen reference documentation
 
 - \ref index Introduction
 - \ref tipshints Tips and hints for using doxygen
-- \ref stylediscussion Long comments, pages, editors
+
 
 The Doxygen web site (https://www.stack.nl/~dimitri/doxygen/ [DEAD LINK]) has a
 complete user manual.  For the impatient, here are the most

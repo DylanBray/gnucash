@@ -1145,7 +1145,7 @@ gnc_account_foreach_split (const Account *acc, std::function<void(Split*)> func,
     if (!GNC_IS_ACCOUNT (acc))
         return;
 
-    auto splits{GET_PRIVATE(acc)->splits};
+    auto& splits{GET_PRIVATE(acc)->splits};
     if (reverse)
         std::for_each(splits.rbegin(), splits.rend(), func);
     else
@@ -1162,7 +1162,7 @@ gnc_account_foreach_split_until_date (const Account *acc, time64 end_date,
     auto after_date = [](time64 end_date, auto s) -> bool
     { return (xaccTransGetDate (xaccSplitGetParent (s)) > end_date); };
 
-    auto splits{GET_PRIVATE(acc)->splits};
+    auto& splits{GET_PRIVATE(acc)->splits};
     auto after_date_iter = std::upper_bound (splits.begin(), splits.end(), end_date, after_date);
     std::for_each (splits.begin(), after_date_iter, f);
 }
@@ -1175,7 +1175,7 @@ gnc_account_find_split (const Account *acc, std::function<bool(const Split*)> pr
     if (!GNC_IS_ACCOUNT (acc))
         return nullptr;
 
-    auto splits{GET_PRIVATE(acc)->splits};
+    const auto& splits{GET_PRIVATE(acc)->splits};
     if (reverse)
     {
         auto latest = std::find_if(splits.rbegin(), splits.rend(), predicate);
@@ -2002,8 +2002,15 @@ gnc_account_remove_split (Account *acc, Split *s)
 
     if (!g_hash_table_remove (priv->splits_hash, s))
         return false;
-    auto it = std::remove (priv->splits.begin(), priv->splits.end(), s);
-    priv->splits.erase (it, priv->splits.end());
+
+    // shortcut pruning the last element. this is the most common
+    // remove_split operation during UI or book shutdown.
+    if (s == priv->splits.back())
+        priv->splits.pop_back();
+    else
+        priv->splits.erase (std::remove (priv->splits.begin(), priv->splits.end(), s),
+                            priv->splits.end());
+
     //FIXME: find better event type
     qof_event_gen(&acc->inst, QOF_EVENT_MODIFY, nullptr);
     // And send the account-based event, too
@@ -5543,7 +5550,7 @@ xaccAccountStagedTransactionTraversal (const Account *acc,
 {
     if (!acc) return 0;
 
-    auto splits = GET_PRIVATE(acc)->splits;
+    auto& splits = GET_PRIVATE(acc)->splits;
     for (auto s : splits)
     {
         auto trans = s->parent;
